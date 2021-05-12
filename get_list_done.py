@@ -22,6 +22,7 @@ iframe = driver.find_element_by_id('mainIframe')
 driver.switch_to.frame(iframe)
 
 rows = driver.find_elements_by_css_selector('#list tr')
+print(len(rows))
 for row in rows:
     tds = row.find_elements_by_tag_name('td')
     subject = tds[1].find_element_by_tag_name('div').get_attribute('title')
@@ -32,5 +33,13 @@ for row in rows:
     current_nodes_info = tds[6].find_element_by_tag_name('div').get_attribute('title')
     str = "[%s],[%s],[%s],[%s],[%s],[%s]" %(subject,start_member_name, pre_approver_name,start_date,deal_time,current_nodes_info)
     print(str)
-    
+
+page_next_button = driver.find_element_by_class_name('pageNext')
+page_next_button.click()
+
+print('------------next page------------')
+
+rows = driver.find_elements_by_css_selector('#list tr')
+print(len(rows))
+
 driver.quit()
