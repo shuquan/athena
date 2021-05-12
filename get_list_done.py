@@ -1,5 +1,9 @@
 import time
+import sys
 from selenium import webdriver
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 driver = webdriver.Chrome('./bin/chromedriver')  # Optional argument, if not specified will search path.
 driver.get('https://oa.99cloud.com.cn/');
@@ -17,5 +21,11 @@ js="document.getElementsByClassName('lev2 lev')[1].style.display='block'"
 driver.execute_script(js)
 driver.find_element_by_id('F01_listDone').click()
 
-time.sleep(5) # Let the user actually see something!
+iframe = driver.find_element_by_id('mainIframe')
+driver.switch_to_frame(iframe)
+
+rows = driver.find_elements_by_css_selector('#list tr')
+print len(rows)
+
+time.sleep(3) # Let the user actually see something!
 driver.quit()
