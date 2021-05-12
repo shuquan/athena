@@ -2,9 +2,6 @@ import time
 import sys
 from selenium import webdriver
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 driver = webdriver.Chrome('./bin/chromedriver')  # Optional argument, if not specified will search path.
 driver.get('https://oa.99cloud.com.cn/');
 
@@ -22,10 +19,18 @@ driver.execute_script(js)
 driver.find_element_by_id('F01_listDone').click()
 
 iframe = driver.find_element_by_id('mainIframe')
-driver.switch_to_frame(iframe)
+driver.switch_to.frame(iframe)
 
 rows = driver.find_elements_by_css_selector('#list tr')
-print len(rows)
-
-time.sleep(3) # Let the user actually see something!
+for row in rows:
+    tds = row.find_elements_by_tag_name('td')
+    subject = tds[1].find_element_by_tag_name('div').get_attribute('title')
+    start_member_name = tds[2].find_element_by_tag_name('div').get_attribute('title')
+    pre_approver_name = tds[3].find_element_by_tag_name('div').get_attribute('title')
+    start_date = tds[4].find_element_by_tag_name('div').get_attribute('title')
+    deal_time = tds[5].find_element_by_tag_name('div').get_attribute('title')
+    current_nodes_info = tds[6].find_element_by_tag_name('div').get_attribute('title')
+    str = "[%s],[%s],[%s],[%s],[%s],[%s]" %(subject,start_member_name, pre_approver_name,start_date,deal_time,current_nodes_info)
+    print(str)
+    
 driver.quit()
