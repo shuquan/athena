@@ -2,6 +2,8 @@ import argparse
 import time
 import pandas as pd
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def login():
     parser = argparse.ArgumentParser()
@@ -33,26 +35,43 @@ def login():
     return driver
 
 def travels_handler(total_travels, record, driver):
+    print(driver.title)
     total_travels.append(record)
+
+def procurement_handler(total_procurement, record, driver):
+    print(driver.title)
+    total_procurement.append(record)
+
+def contracts_handler(total_contracts, record, driver):
+    print(driver.title)
+    total_contracts.append(record)
+
+def weekly_reports_handler(total_weekly_reports, record, driver):
+    print(driver.title)
+    total_weekly_reports.append(record)
+
+def others_handler(others, record, driver):
+    print(driver.title)
+    others.append(record)
+
+def to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others):
+    df = pd.DataFrame(total_records)
+    df.to_excel('总表.xlsx', sheet_name='总表')
+
     df = pd.DataFrame(total_travels)
     df.to_excel('出差单.xlsx', sheet_name='出差单')
 
-
-def procurement_handler(total_procurement, record, driver):
-    total_procurement.append(record)
     df = pd.DataFrame(total_procurement)
     df.to_excel('采购单.xlsx', sheet_name='采购单')
 
-
-def contracts_handler(total_contracts, record, driver):
-    total_contracts.append(record)
     df = pd.DataFrame(total_contracts)
     df.to_excel('合同单.xlsx', sheet_name='合同单')
 
-def weekly_reports_handler(total_weekly_reports, record, driver):
-    total_weekly_reports.append(record)
     df = pd.DataFrame(total_weekly_reports)
     df.to_excel('周报.xlsx', sheet_name='周报')
+
+    df = pd.DataFrame(others)
+    df.to_excel('未归类.xlsx', sheet_name='未归类')
 
 def main():
     driver = login()
@@ -63,15 +82,16 @@ def main():
     total_procurement = []
     total_contracts = []
     total_weekly_reports = []
-#    others = []
+    others = []
 
+    current_window_handle = driver.current_window_handle
     # Get each record from List Done and handle it.
     while True:
         rows = driver.find_elements_by_css_selector('#list tr')
         total_number = total_number + len(rows)
 
-        # Just for testing limit to 100 records
-        if total_number > 100:
+        # Just for testing limit to 40 records
+        if total_number > 40:
             break
 
         for row in rows:
@@ -85,6 +105,11 @@ def main():
             record = {'标题': subject, '发起人':start_member_name, '上一处理人':pre_approver_name, '发起时间':start_date, '处理时间':deal_time, '当前代办人':current_nodes_info}
             total_records.append(record)
 
+            # Click each row and Open new tab to fetch more data
+            webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
+            WebDriverWait(driver, 3).until(EC.number_of_windows_to_be(2))
+            window_handles = driver.window_handles
+            driver.switch_to.window(window_handles[1])
             if '出差单' in subject:
                 travels_handler(total_travels, record, driver)
             elif '采购' in subject:
@@ -93,6 +118,15 @@ def main():
                 contracts_handler(total_contracts, record, driver)
             elif '周报' in subject:
                 weekly_reports_handler(total_weekly_reports, record, driver)
+            else:
+                others_handler(others, record, driver)
+
+            driver.close()
+            driver.switch_to.window(current_window_handle)
+            # Move to List Done
+            iframe = driver.find_element_by_id('mainIframe')
+            driver.switch_to.frame(iframe)
+
 
 
         if len(rows) < 20:
@@ -102,12 +136,16 @@ def main():
         page_next_button.click()
         time.sleep(1)
 
-    df = pd.DataFrame(total_records)
-    df.to_excel('总表.xlsx', sheet_name='总表')
-
-
     driver.quit()
 
+    to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others)
+
+    print(len(total_travels))
+    print(len(total_procurement))
+    print(len(total_contracts))
+    print(len(total_weekly_reports))
+    print(len(others))
+    print(len(total_records))
 
 if __name__ == '__main__':
     main()
