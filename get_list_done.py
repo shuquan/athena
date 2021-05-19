@@ -48,6 +48,24 @@ def contracts_handler(total_contracts, record, driver):
 
 def weekly_reports_handler(total_weekly_reports, record, driver):
     print(driver.title)
+    iframe = driver.find_element_by_id('zwIframe')
+    driver.switch_to.frame(iframe)
+    record_detail = {}
+    rows = driver.find_elements_by_css_selector('.is-detailshover')
+    for row in rows:
+        tds = row.find_elements_by_css_selector('section [class*="browse"]')
+        record_detail['年份'] = tds[0].get_attribute('textContent')
+        record_detail['月份'] = tds[1].get_attribute('textContent')
+        record_detail['周'] = tds[2].get_attribute('textContent')
+        record_detail['客户名称'] = tds[3].get_attribute('textContent')
+        record_detail['大类'] = tds[4].get_attribute('textContent')
+        record_detail['中类'] = tds[5].get_attribute('textContent')
+        record_detail['小类'] = tds[6].get_attribute('textContent')
+        record_detail['耗时'] = tds[7].get_attribute('textContent')
+        record_detail['加班'] = tds[8].get_attribute('textContent')
+        record_detail['具体工作描述'] = tds[9].get_attribute('textContent')
+
+    print(record_detail)
     total_weekly_reports.append(record)
 
 def others_handler(others, record, driver):
@@ -90,8 +108,8 @@ def main():
         rows = driver.find_elements_by_css_selector('#list tr')
         total_number = total_number + len(rows)
 
-        # Just for testing limit to 40 records
-        if total_number > 40:
+        # Just for testing limit to 20 records
+        if total_number > 20:
             break
 
         for row in rows:
@@ -107,7 +125,7 @@ def main():
 
             # Click each row and Open new tab to fetch more data
             webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
-            WebDriverWait(driver, 3).until(EC.number_of_windows_to_be(2))
+            WebDriverWait(driver, 5).until(EC.number_of_windows_to_be(2))
             window_handles = driver.window_handles
             driver.switch_to.window(window_handles[1])
             if '出差单' in subject:
