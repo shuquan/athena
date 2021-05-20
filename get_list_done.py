@@ -4,6 +4,7 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
 def login():
     parser = argparse.ArgumentParser()
@@ -12,7 +13,9 @@ def login():
     parser.add_argument('password')
     args = parser.parse_args()
 
-    driver = webdriver.Chrome('./bin/chromedriver')
+    chrome_options=Options()
+    chrome_options.add_argument('--headless')
+    driver = webdriver.Chrome('./bin/chromedriver', options=chrome_options)
     driver.get(args.url);
 
     login_username = driver.find_element_by_id('login_username')
@@ -35,41 +38,40 @@ def login():
     return driver
 
 def travels_handler(total_travels, record, driver):
-    print(driver.title)
+    print('[出差]%s' % driver.title)
     total_travels.append(record)
 
 def procurement_handler(total_procurement, record, driver):
-    print(driver.title)
+    print('[采购]%s' % driver.title)
     total_procurement.append(record)
 
 def contracts_handler(total_contracts, record, driver):
-    print(driver.title)
+    print('[合同]%s' % driver.title)
     total_contracts.append(record)
 
 def weekly_reports_handler(total_weekly_reports, record, driver):
-    print(driver.title)
+    print('[周报]%s' % driver.title)
     iframe = driver.find_element_by_id('zwIframe')
     driver.switch_to.frame(iframe)
-    record_detail = {}
     rows = driver.find_elements_by_css_selector('.is-detailshover')
     for row in rows:
         tds = row.find_elements_by_css_selector('section [class*="browse"]')
-        record_detail['年份'] = tds[0].get_attribute('textContent')
-        record_detail['月份'] = tds[1].get_attribute('textContent')
-        record_detail['周'] = tds[2].get_attribute('textContent')
-        record_detail['客户名称'] = tds[3].get_attribute('textContent')
-        record_detail['大类'] = tds[4].get_attribute('textContent')
-        record_detail['中类'] = tds[5].get_attribute('textContent')
-        record_detail['小类'] = tds[6].get_attribute('textContent')
-        record_detail['耗时'] = tds[7].get_attribute('textContent')
-        record_detail['加班'] = tds[8].get_attribute('textContent')
-        record_detail['具体工作描述'] = tds[9].get_attribute('textContent')
-
-    print(record_detail)
-    total_weekly_reports.append(record)
+        report = {}
+        report['发起人'] = record['发起人']
+        report['年份'] = tds[0].get_attribute('textContent')
+        report['月份'] = tds[1].get_attribute('textContent')
+        report['周'] = tds[2].get_attribute('textContent')
+        report['客户名称'] = tds[3].get_attribute('textContent')
+        report['大类'] = tds[4].get_attribute('textContent')
+        report['中类'] = tds[5].get_attribute('textContent')
+        report['小类'] = tds[6].get_attribute('textContent')
+        report['耗时'] = tds[7].get_attribute('textContent')
+        report['加班'] = tds[8].get_attribute('textContent')
+        report['具体工作描述'] = tds[9].get_attribute('textContent')
+        total_weekly_reports.append(report)
 
 def others_handler(others, record, driver):
-    print(driver.title)
+    print('[其他]%s' % driver.title)
     others.append(record)
 
 def to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others):
@@ -91,6 +93,51 @@ def to_excel(total_records, total_travels, total_procurement, total_contracts, t
     df = pd.DataFrame(others)
     df.to_excel('未归类.xlsx', sheet_name='未归类')
 
+def to_report(total_weekly_reports):
+    # 售前支持 - 技术方案
+    tech_solution = []
+    # 售前支持 - 技术交流
+    tech_communication = []
+    # 售前支持 - PoC
+    poc = []
+    # 售前支持 - 投标工作
+    biding = []
+    # 售前支持 - 市场推广
+    marketing = []
+#
+#    # 项目交付 - 项目管理
+#    project_management = []
+
+    # 内部工作 - 提供培训
+    # 内部工作 - 参与培训
+    # 内部工作 - 技术突破
+    # 内部工作 - 证书过审
+    # 内部工作 - 控标点过审
+    # 内部工作 - 合同过审
+    # 内部工作 - 团队管理
+    # 内部工作 - 离职交接
+
+    # 行政事务
+
+    # 休假
+
+    for report in total_weekly_reports:
+        if '技术方案' in report['中类']:
+            tech_solution.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
+        elif '技术交流' in report['中类']:
+            tech_communication.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
+        elif 'poc' in report['中类']:
+            poc.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
+        elif '投标工作' in report['中类']:
+            biding.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
+        elif '市场推广' in report['中类']:
+            marketing.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
+
+    print(total_weekly_reports)
+
+
+
+
 def main():
     driver = login()
 
@@ -109,7 +156,7 @@ def main():
         total_number = total_number + len(rows)
 
         # Just for testing limit to 20 records
-        if total_number > 20:
+        if total_number > 40:
             break
 
         for row in rows:
@@ -130,12 +177,12 @@ def main():
             driver.switch_to.window(window_handles[1])
             if '出差单' in subject:
                 travels_handler(total_travels, record, driver)
-            elif '采购' in subject:
-                procurement_handler(total_procurement, record, driver)
             elif '合同' in subject:
                 contracts_handler(total_contracts, record, driver)
             elif '周报' in subject:
                 weekly_reports_handler(total_weekly_reports, record, driver)
+            elif '采购' in subject:
+                procurement_handler(total_procurement, record, driver)
             else:
                 others_handler(others, record, driver)
 
@@ -144,8 +191,6 @@ def main():
             # Move to List Done
             iframe = driver.find_element_by_id('mainIframe')
             driver.switch_to.frame(iframe)
-
-
 
         if len(rows) < 20:
             break
@@ -156,14 +201,9 @@ def main():
 
     driver.quit()
 
+    to_report(total_weekly_reports)
     to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others)
 
-    print(len(total_travels))
-    print(len(total_procurement))
-    print(len(total_contracts))
-    print(len(total_weekly_reports))
-    print(len(others))
-    print(len(total_records))
 
 if __name__ == '__main__':
     main()
