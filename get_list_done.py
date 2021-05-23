@@ -6,6 +6,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
+from athena.objects import objects
+
 def login():
     parser = argparse.ArgumentParser()
     parser.add_argument('url')
@@ -120,6 +122,8 @@ def to_report(total_weekly_reports):
     # 行政事务
 
     # 休假
+
+    project = project.Project()
 
     for report in total_weekly_reports:
         if '技术方案' in report['中类']:
