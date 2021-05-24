@@ -69,7 +69,8 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
         report['小类'] = tds[6].get_attribute('textContent')
         report['耗时'] = tds[7].get_attribute('textContent')
         report['加班'] = tds[8].get_attribute('textContent')
-        report['具体工作描述'] = tds[9].get_attribute('textContent')
+        report['下周计划'] = tds[9].get_attribute('textContent')
+        report['具体工作描述'] = tds[10].get_attribute('textContent')
         total_weekly_reports.append(report)
 
 def others_handler(others, record, driver):
@@ -97,18 +98,11 @@ def to_excel(total_records, total_travels, total_procurement, total_contracts, t
 
 def to_report(total_weekly_reports):
     # 售前支持 - 技术方案
-    tech_solution = []
     # 售前支持 - 技术交流
-    tech_communication = []
     # 售前支持 - PoC
-    poc = []
     # 售前支持 - 投标工作
-    biding = []
     # 售前支持 - 市场推广
-    marketing = []
-#
-#    # 项目交付 - 项目管理
-#    project_management = []
+    # 项目交付 - 项目管理
 
     # 内部工作 - 提供培训
     # 内部工作 - 参与培训
@@ -123,23 +117,14 @@ def to_report(total_weekly_reports):
 
     # 休假
 
-    project = project.Project()
+    project_list = objects.ProjectList()
 
     for report in total_weekly_reports:
-        if '技术方案' in report['中类']:
-            tech_solution.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
-        elif '技术交流' in report['中类']:
-            tech_communication.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
-        elif 'poc' in report['中类']:
-            poc.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
-        elif '投标工作' in report['中类']:
-            biding.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
-        elif '市场推广' in report['中类']:
-            marketing.append({'售前':report['发起人'], '客户名称':report['客户名称'], '具体工作描述':report['具体工作描述']})
+        p = objects.Project()
+        p.create(report)
+        project_list.insert(p)
 
-    print(total_weekly_reports)
-
-
+    project_list.to_excel()
 
 
 def main():
@@ -160,7 +145,7 @@ def main():
         total_number = total_number + len(rows)
 
         # Just for testing limit to 20 records
-        if total_number > 40:
+        if total_number > 20:
             break
 
         for row in rows:
