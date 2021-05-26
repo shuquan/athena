@@ -55,7 +55,11 @@ class Project():
         # 结束日期
         self.end_date = None
 
-        # 更新日期 TODO
+        # 更新日期
+        self.update_date = None
+
+        # 跟进历史
+        self.history = []
 
         # 项目名称
         self.project_name = None
@@ -82,6 +86,19 @@ class Project():
 
         st = '%(y)s-12' % {'y':report['年份']}
         self.end_date = datetime.datetime.strptime(st, '%Y-%m')
+
+        if '技术交流' in report['中类']:
+            self.phase = Phase.TECH_COMMUNICATION
+        elif '技术方案' in report['中类']:
+            self.phase = Phase.TECH_SOLUTION
+        elif 'POC' in report['中类']:
+            self.phase = Phase.POC
+        elif '投标工作' in report['中类']:
+            self.phase = Phase.BIDING
+        elif '合同审核' in report['中类']:
+            self.phase = Phase.CONTRACT
+        elif '项目管理' in report['中类']:
+            self.phase = Phase.DELIVER
 
     def update():
         pass
