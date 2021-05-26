@@ -1,4 +1,4 @@
-import datetime
+#import datetime
 import pandas as pd
 from enum import Enum
 
@@ -25,10 +25,24 @@ class ProjectList():
     def insert(self, project):
         if project.project_name in self.project_list:
             p = self.project_list[project.project_name]
+
+            if p.start_date > p.update_date:
+                p.start_date = p.update_date
+
             p.sales = p.sales | project.sales
             p.pre_sales = p.pre_sales | project.pre_sales
+            p.history = p.history + project.history
+            p.hours = p.hours + project.hours
+
+            p.history = sorted(p.history, key = lambda x:x['WW'], reverse=True)
+
+            p.phase = p.history[0]['Detail'][0]
         else:
             self.project_list[project.project_name] = project
+
+    def check(self):
+        pass
+
 
     def to_excel(self):
         output = []
@@ -38,6 +52,12 @@ class ProjectList():
             tmp['项目名称'] = self.project_list[p].project_name
             tmp['销售'] = self.project_list[p].sales
             tmp['售前'] = self.project_list[p].pre_sales
+            tmp['跟进记录'] = self.project_list[p].history
+
+            # TODO Use default status
+            tmp['状态'] = self.project_list[p].status.value
+            tmp['阶段'] = self.project_list[p].phase.value
+            tmp['耗时'] = self.project_list[p].hours
             output.append(tmp)
 
         df = pd.DataFrame(output)
@@ -76,16 +96,27 @@ class Project():
         # 项目状态：丢失、中标、加强、推迟、稳固、终止、跟进、风险
         self.status = Status.FOLLOW
 
+        # 耗时
+        self.hours = 0
+
     def create(self, report):
 
+        self.sales.add(report['销售人员'])
         self.pre_sales.add(report['发起人'])
         self.project_name = report['客户名称']
+        self.hours = report['耗时']
+        self.update_date = int(report['周'])
 
-        st = '%(y)s-%(m)s' % {'y':report['年份'], 'm':report['月份']}
-        self.start_date = datetime.datetime.strptime(st, '%Y-%m')
+# TODO Use work week as start date
+#        st = '%(y)s-%(m)s' % {'y':report['年份'], 'm':report['月份']}
+#        self.start_date = datetime.datetime.strptime(st, '%Y-%m')
+#        self.start_date = st
+        self.start_date = self.update_date
 
+# TODO Use the end of this year as end date
         st = '%(y)s-12' % {'y':report['年份']}
-        self.end_date = datetime.datetime.strptime(st, '%Y-%m')
+#       self.end_date = datetime.datetime.strptime(st, '%Y-%m')
+        self.end_date = st
 
         if '技术交流' in report['中类']:
             self.phase = Phase.TECH_COMMUNICATION
@@ -99,6 +130,8 @@ class Project():
             self.phase = Phase.CONTRACT
         elif '项目管理' in report['中类']:
             self.phase = Phase.DELIVER
+
+        self.history.append({'WW':self.start_date, 'Detail':[self.phase, report['具体工作描述'], self.hours, self.pre_sales]})
 
     def update():
         pass
