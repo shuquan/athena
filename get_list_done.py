@@ -137,6 +137,7 @@ def to_report(total_weekly_reports):
         project_list.insert(p)
 
     project_list.to_excel()
+    project_list.to_report()
 
 
 def main():

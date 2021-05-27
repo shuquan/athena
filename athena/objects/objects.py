@@ -1,5 +1,8 @@
 #import datetime
+import jinja2
 import pandas as pd
+import time
+
 from enum import Enum
 
 class Phase(Enum):
@@ -62,6 +65,56 @@ class ProjectList():
 
         df = pd.DataFrame(output)
         df.to_excel('跟踪表.xlsx', sheet_name='跟踪表')
+
+    def to_report(self):
+
+        # In Python, weeks starts from 0 while we start from 1.
+        current_work_week = int(time.strftime('%W')) + 1
+
+        biding_table = []
+        poc_table = []
+        tech_communication_table = []
+        tech_solution_table = []
+
+        for p in self.project_list:
+            tmp = {}
+            tmp['项目名称'] = self.project_list[p].project_name
+            tmp['销售'] = self.project_list[p].sales
+            tmp['售前'] = self.project_list[p].pre_sales
+            tmp['耗时'] = self.project_list[p].hours
+            tmp['跟进记录'] = self.project_list[p].history[0]['Detail'][1]
+            tmp['后续工作'] = self.project_list[p].history[0]['Detail'][2]
+
+            if self.project_list[p].phase is Phase.BIDING:
+                biding_table.append(tmp)
+            elif self.project_list[p].phase is Phase.POC:
+                poc_table.append(tmp)
+            elif self.project_list[p].phase is Phase.TECH_COMMUNICATION:
+                tech_communication_table.append(tmp)
+            elif self.project_list[p].phase is Phase.TECH_SOLUTION:
+                tech_solution_table.append(tmp)
+
+        df = pd.DataFrame(biding_table)
+        biding_table_html = df.to_html()
+
+        df = pd.DataFrame(poc_table)
+        poc_table_html = df.to_html()
+
+        df = pd.DataFrame(tech_communication_table)
+        tech_communication_table_html = df.to_html()
+
+        df = pd.DataFrame(tech_solution_table)
+        tech_solution_table_html = df.to_html()
+
+        # Template handling
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=''))
+        template = env.get_template('template.html')
+        html = template.render(work_week=current_work_week, biding_table=biding_table_html, poc_table=poc_table_html,
+                tech_communication_table=tech_communication_table_html, tech_solution_table=tech_solution_table_html )
+
+        # Write the HTML file
+        with open('report.html', 'w') as f:
+            f.write(html)
 
 class Project():
     # Version 1.0: Initial version
@@ -131,7 +184,7 @@ class Project():
         elif '项目管理' in report['中类']:
             self.phase = Phase.DELIVER
 
-        self.history.append({'WW':self.start_date, 'Detail':[self.phase, report['具体工作描述'], self.hours, self.pre_sales]})
+        self.history.append({'WW':self.start_date, 'Detail':[self.phase, report['具体工作描述'], report['下周计划'], self.hours, self.pre_sales]})
 
     def update():
         pass
