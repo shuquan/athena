@@ -2,6 +2,9 @@
 import jinja2
 import pandas as pd
 import time
+import matplotlib.pyplot as plt
+plt.rcParams['font.sans-serif'] = [u'SimHei']
+plt.rcParams['axes.unicode_minus'] = False
 
 from enum import Enum
 
@@ -113,8 +116,16 @@ class ProjectList():
                 tech_communication_table=tech_communication_table_html, tech_solution_table=tech_solution_table_html )
 
         # Write the HTML file
+        html = html.replace(r"\n", "<br/>")
         with open('report.html', 'w') as f:
             f.write(html)
+
+        # Plot
+        df = pd.DataFrame()
+        report = pd.read_excel("周报.xlsx", sheet_name="周报")
+        t = report.groupby(u'中类')[u'耗时'].sum()
+        fig = t.plot(kind='bar').get_figure()
+        fig.savefig('plot.svg')
 
 class Project():
     # Version 1.0: Initial version
