@@ -3,7 +3,7 @@ import jinja2
 import pandas as pd
 import time
 import matplotlib.pyplot as plt
-plt.rcParams['font.sans-serif'] = [u'SimHei']
+plt.rcParams['font.sans-serif'] = [u'Songti SC']
 plt.rcParams['axes.unicode_minus'] = False
 
 from enum import Enum
@@ -124,7 +124,7 @@ class ProjectList():
         df = pd.DataFrame()
         report = pd.read_excel("周报.xlsx", sheet_name="周报")
         t = report.groupby(u'中类')[u'耗时'].sum()
-        fig = t.plot(kind='bar').get_figure()
+        fig = t.plot(kind='bar', fontsize=10, rot=10).get_figure()
         fig.savefig('plot.svg')
 
 class Project():

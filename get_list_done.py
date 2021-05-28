@@ -158,7 +158,7 @@ def main():
         total_number = total_number + len(rows)
 
         # Just for testing limit to 20 records
-        if total_number > 40:
+        if total_number > 100:
             break
 
         for row in rows:
