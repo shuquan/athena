@@ -82,8 +82,8 @@ class ProjectList():
         for p in self.project_list:
             tmp = {}
             tmp['项目名称'] = self.project_list[p].project_name
-            tmp['销售'] = self.project_list[p].sales
-            tmp['售前'] = self.project_list[p].pre_sales
+            tmp['销售'] = ','.join(self.project_list[p].sales)
+            tmp['售前'] = ','.join(self.project_list[p].pre_sales)
             tmp['耗时'] = self.project_list[p].hours
             tmp['跟进记录'] = self.project_list[p].history[0]['Detail'][1]
             tmp['后续工作'] = self.project_list[p].history[0]['Detail'][2]
