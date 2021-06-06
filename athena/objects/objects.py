@@ -123,9 +123,31 @@ class ProjectList():
         # Plot
         df = pd.DataFrame()
         report = pd.read_excel("周报.xlsx", sheet_name="周报")
-        t = report.groupby(u'中类')[u'耗时'].sum()
-        fig = t.plot(kind='bar', fontsize=10, rot=10).get_figure()
-        fig.savefig('plot.svg')
+
+        all_presales = report.groupby([u'发起人'])[u'耗时'].sum()
+        all_presales.index.name = None
+        all_presales.plot(kind='barh',figsize=(10,10),fontsize='15')
+        plt.savefig('all_presales.svg')
+
+        all_tasks = report.groupby(u'中类')[u'耗时'].sum()
+        all_tasks.index.name = None
+        all_tasks.plot(kind='barh',figsize=(10,10),fontsize='15')
+        plt.savefig('all_tasks.svg')
+
+        final_report = pd.DataFrame(index=all_presales.index, columns=all_tasks.index)
+        final_report=final_report.fillna(0)
+        final_report.index.name=None
+
+        for i in all_presales.index:
+            presale_tasks = report[report.发起人 == i].groupby([u'中类'])[u'耗时'].sum()
+            for j in all_tasks.index:
+                if j in presale_tasks.index:
+                    final_report[j][i]=presale_tasks[j]
+
+        ax=final_report.plot.barh(stacked=True,figsize=(20,20),fontsize='15');
+        for i, v in enumerate(all_presales):
+            ax.text(v+1, i, str(v), color='black', fontweight='bold', fontsize=13)
+        plt.savefig('plot.svg')
 
 class Project():
     # Version 1.0: Initial version
