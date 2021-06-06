@@ -29,10 +29,12 @@ def login():
     login_button = driver.find_element_by_id('login_button')
     login_button.submit()
 
-    # Move to List Done
     js="document.getElementsByClassName('lev2 lev')[1].style.display='block'"
     driver.execute_script(js)
-    driver.find_element_by_id('F01_listDone').click()
+    # Move to List Done
+    # driver.find_element_by_id('F01_listDone').click()
+    # Move to List Pending
+    driver.find_element_by_id('F01_listPending').click()
 
     iframe = driver.find_element_by_id('mainIframe')
     driver.switch_to.frame(iframe)
