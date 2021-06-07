@@ -1,4 +1,5 @@
 import argparse
+import logging
 import time
 import pandas as pd
 from selenium import webdriver
@@ -7,6 +8,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
 from athena.objects import objects
+
+def logger():
+    LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+    DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT, datefmt=DATE_FORMAT)
+
 
 def login():
     parser = argparse.ArgumentParser()
@@ -46,19 +53,19 @@ def login():
     return driver
 
 def travels_handler(total_travels, record, driver):
-    print('[出差]%s' % driver.title)
+    logging.info('[出差]%s' % driver.title)
     total_travels.append(record)
 
 def procurement_handler(total_procurement, record, driver):
-    print('[采购]%s' % driver.title)
+    logging.info('[采购]%s' % driver.title)
     total_procurement.append(record)
 
 def contracts_handler(total_contracts, record, driver):
-    print('[合同]%s' % driver.title)
+    logging.info('[合同]%s' % driver.title)
     total_contracts.append(record)
 
 def weekly_reports_handler(total_weekly_reports, record, driver):
-    print('[周报]%s' % driver.title)
+    logging.info('[周报]%s' % driver.title)
     iframe = driver.find_element_by_id('zwIframe')
     driver.switch_to.frame(iframe)
     rows = driver.find_elements_by_css_selector('.is-detailshover')
@@ -92,7 +99,7 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
         total_weekly_reports.append(report)
 
 def others_handler(others, record, driver):
-    print('[其他]%s' % driver.title)
+    logging.info('[其他]%s' % driver.title)
     others.append(record)
 
 def to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others):
@@ -147,6 +154,9 @@ def to_report(total_weekly_reports):
 
 
 def main():
+
+    logger()
+
     driver = login()
 
     total_number = 0
