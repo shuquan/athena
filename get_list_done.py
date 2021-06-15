@@ -9,6 +9,14 @@ from selenium.webdriver.chrome.options import Options
 
 from athena.objects import objects
 
+parser = argparse.ArgumentParser()
+parser.add_argument('url')
+parser.add_argument('username')
+parser.add_argument('password')
+parser.add_argument('--list')
+parser.add_argument('--week')
+args = parser.parse_args()
+
 def logger():
     LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
     DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
@@ -16,13 +24,6 @@ def logger():
 
 
 def login():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('url')
-    parser.add_argument('username')
-    parser.add_argument('password')
-    parser.add_argument('--list')
-    args = parser.parse_args()
-
     chrome_options=Options()
     chrome_options.add_argument('--headless')
     driver = webdriver.Chrome('./bin/chromedriver', options=chrome_options)
@@ -66,6 +67,8 @@ def contracts_handler(total_contracts, record, driver):
 
 def weekly_reports_handler(total_weekly_reports, record, driver):
     logging.info('[周报]%s' % driver.title)
+    week = args.week
+
     iframe = driver.find_element_by_id('zwIframe')
     driver.switch_to.frame(iframe)
     rows = driver.find_elements_by_css_selector('.is-detailshover')
@@ -96,7 +99,12 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
         else:
             report['加班'] = 0
 
-        total_weekly_reports.append(report)
+        if week is None:
+            total_weekly_reports.append(report)
+        elif report['周'] == week:
+            total_weekly_reports.append(report)
+        else:
+            logging.info('SKIP [周报]%s [%s]' % (driver.title,report))
 
 def others_handler(others, record, driver):
     logging.info('[其他]%s' % driver.title)
