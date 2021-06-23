@@ -149,6 +149,34 @@ class ProjectList():
             ax.text(v+1, i, str(v), color='black', fontweight='bold', fontsize=13)
         plt.savefig('plot.svg')
 
+        # Echarts Template handling
+        env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=''))
+        template_echarts = env.get_template('template_echarts.html')
+        chart_data = {
+            'legend': list(final_report.columns.values),
+            'y_data': list(final_report.index.values),
+            'series': []
+        }
+
+        for (column_name, column_data) in final_report.iteritems():
+            chart_data['series'].append({
+                'name':column_name,
+                'type': 'bar',
+                'stack': 'total',
+                'label': {
+                    'show': 'true'
+                },
+                'emphasis': {
+                    'focus': 'series'
+                },
+                'data':list(column_data)
+            })
+        html = template_echarts.render(chart_data=chart_data)
+
+        # Write the Echarts HTML file
+        with open('report_echarts.html', 'w') as f:
+            f.write(html)
+
 class Project():
     # Version 1.0: Initial version
     VERSION = '1.0'
