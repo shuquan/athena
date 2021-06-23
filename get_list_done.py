@@ -182,7 +182,7 @@ def main():
         total_number = total_number + len(rows)
 
         # Just for testing limit to 20 records
-        if total_number > 40:
+        if total_number > 20:
             break
 
         for row in rows:
@@ -227,8 +227,8 @@ def main():
 
     driver.quit()
 
-    to_report(total_weekly_reports)
     to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others)
+    to_report(total_weekly_reports)
 
 
 if __name__ == '__main__':

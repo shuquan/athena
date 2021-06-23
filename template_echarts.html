@@ -3,7 +3,8 @@
         <meta charset="utf-8">
     </head>
     <body style="height: 100%; margin: 0">
-        <div id="container" style="height: 100%"></div>
+        <div id="presale_by_task" style="height: 100%"></div>
+        <div id="project_by_task" style="height: 100%"></div>
 
         <script type="text/javascript" src="js/echarts.min.js"></script>
         <!-- Uncomment this line if you want to dataTool extension
@@ -25,16 +26,20 @@
         -->
 
         <script type="text/javascript">
-var dom = document.getElementById("container");
-var myChart = echarts.init(dom);
-var chart_data = {{chart_data}}
+var presale_by_task_dom = document.getElementById("presale_by_task");
+var presale_by_task_chart = echarts.init(presale_by_task_dom);
+var project_by_task_dom = document.getElementById("project_by_task");
+var project_by_task_chart = echarts.init(project_by_task_dom);
+var presale_by_task_chart_data = {{presale_by_task_chart_data}}
+var project_by_task_chart_data = {{project_by_task_chart_data}}
 var app = {};
 
-var option;
+var presale_by_task_option;
+var project_by_task_option;
 
 
 
-option = {
+presale_by_task_option = {
     tooltip: {
         trigger: 'axis',
         axisPointer: {            // Use axis to trigger tooltip
@@ -42,7 +47,7 @@ option = {
         }
     },
     legend: {
-        data: chart_data.legend
+        data: presale_by_task_chart_data.legend
     },
     grid: {
         left: '3%',
@@ -55,15 +60,44 @@ option = {
     },
     yAxis: {
         type: 'category',
-        data: chart_data.y_data
+        data: presale_by_task_chart_data.y_data
     },
-    series: chart_data.series 
+    series: presale_by_task_chart_data.series 
 };
 
-if (option && typeof option === 'object') {
-    myChart.setOption(option);
+if (presale_by_task_option && typeof presale_by_task_option === 'object') {
+    presale_by_task_chart.setOption(presale_by_task_option);
 }
 
+project_by_task_option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {            // Use axis to trigger tooltip
+            type: 'shadow'        // 'shadow' as default; can also be 'line' or 'shadow'
+        }
+    },
+    legend: {
+        data: project_by_task_chart_data.legend
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'value'
+    },
+    yAxis: {
+        type: 'category',
+        data: project_by_task_chart_data.y_data
+    },
+    series: project_by_task_chart_data.series 
+};
+
+if (project_by_task_option && typeof project_by_task_option === 'object') {
+    project_by_task_chart.setOption(project_by_task_option);
+}
         </script>
     </body>
 </html>
