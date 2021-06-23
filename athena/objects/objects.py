@@ -120,19 +120,24 @@ class ProjectList():
         with open('report.html', 'w') as f:
             f.write(html)
 
-        # Plot
+        # Plot TODO Use project list here
         df = pd.DataFrame()
         report = pd.read_excel("周报.xlsx", sheet_name="周报")
 
-        all_presales = report.groupby([u'发起人'])[u'耗时'].sum()
+        all_presales = report.groupby([u'发起人'])[u'耗时'].sum().sort_values(ascending=True)
         all_presales.index.name = None
         all_presales.plot(kind='barh',figsize=(10,10),fontsize='15')
         plt.savefig('all_presales.svg')
 
-        all_tasks = report.groupby(u'中类')[u'耗时'].sum()
+        all_tasks = report.groupby(u'中类')[u'耗时'].sum().sort_values(ascending=True)
         all_tasks.index.name = None
         all_tasks.plot(kind='barh',figsize=(10,10),fontsize='15')
         plt.savefig('all_tasks.svg')
+
+        all_projects = report.groupby(u'客户名称')[u'耗时'].sum().sort_values(ascending=True)
+        all_projects.index.name=None
+        all_projects.plot(kind='barh',figsize=(15,15),fontsize='15')
+        plt.savefig('all_projects.svg')
 
         final_report = pd.DataFrame(index=all_presales.index, columns=all_tasks.index)
         final_report=final_report.fillna(0)
