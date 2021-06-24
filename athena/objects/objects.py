@@ -67,7 +67,7 @@ class ProjectList():
             output.append(tmp)
 
         df = pd.DataFrame(output)
-        df.to_excel('跟踪表.xlsx', sheet_name='跟踪表')
+        df.to_excel('data/跟踪表.xlsx', sheet_name='跟踪表')
 
     def to_report(self):
 
@@ -118,105 +118,6 @@ class ProjectList():
         # Write the HTML file
         html = html.replace(r"\n", "<br/>")
         with open('report.html', 'w') as f:
-            f.write(html)
-
-        # Plot TODO Use project list here
-        df = pd.DataFrame()
-        report = pd.read_excel("周报.xlsx", sheet_name="周报")
-
-        all_presales = report.groupby([u'发起人'])[u'耗时'].sum().sort_values(ascending=True)
-        all_presales.index.name = None
-        all_presales.plot(kind='barh',figsize=(10,10),fontsize='15')
-        plt.savefig('all_presales.svg')
-
-        all_tasks = report.groupby(u'中类')[u'耗时'].sum().sort_values(ascending=True)
-        all_tasks.index.name = None
-        all_tasks.plot(kind='barh',figsize=(10,10),fontsize='15')
-        plt.savefig('all_tasks.svg')
-
-        all_projects = report.groupby(u'客户名称')[u'耗时'].sum().sort_values(ascending=True)
-        all_projects.index.name=None
-        all_projects.plot(kind='barh',figsize=(15,15),fontsize='15')
-        plt.savefig('all_projects.svg')
-
-        # Presales/Task Report
-        presale_by_task_report = pd.DataFrame(index=all_presales.index, columns=all_tasks.index)
-        presale_by_task_report=presale_by_task_report.fillna(0)
-        presale_by_task_report.index.name=None
-
-        for i in all_presales.index:
-            presale_tasks = report[report.发起人 == i].groupby([u'中类'])[u'耗时'].sum()
-            for j in all_tasks.index:
-                if j in presale_tasks.index:
-                    presale_by_task_report[j][i]=presale_tasks[j]
-
-        ax=presale_by_task_report.plot.barh(stacked=True,figsize=(20,20),fontsize='15');
-        for i, v in enumerate(all_presales):
-            ax.text(v+1, i, str(v), color='black', fontweight='bold', fontsize=13)
-        plt.savefig('presale_by_task.svg')
-
-        # Project/Task Report
-        project_by_task_report = pd.DataFrame(index=all_projects.index, columns=all_tasks.index)
-        project_by_task_report=project_by_task_report.fillna(0)
-        project_by_task_report.index.name=None
-        for i in all_projects.index:
-            project_tasks = report[report.客户名称 == i].groupby([u'中类'])[u'耗时'].sum()
-            for j in all_tasks.index:
-                if j in project_tasks.index:
-                    project_by_task_report[j][i]=project_tasks[j]
-        ax=project_by_task_report.plot.barh(stacked=True,figsize=(80,80),fontsize='50');
-        ax.legend(fontsize=35)
-        for i, v in enumerate(all_projects):
-            ax.text(v, i, str(v), color='black', fontweight='bold', fontsize=45)
-        plt.savefig('project_by_task.svg')
-
-        # Echarts Template handling
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=''))
-        template_echarts = env.get_template('template_echarts.html')
-        presale_by_task_chart_data = {
-            'legend': list(presale_by_task_report.columns.values),
-            'y_data': list(presale_by_task_report.index.values),
-            'series': []
-        }
-
-        for (column_name, column_data) in presale_by_task_report.iteritems():
-            presale_by_task_chart_data['series'].append({
-                'name':column_name,
-                'type': 'bar',
-                'stack': 'total',
-                'label': {
-                    'show': 'true'
-                },
-                'emphasis': {
-                    'focus': 'series'
-                },
-                'data':list(column_data)
-            })
-
-        project_by_task_chart_data = {
-             'legend': list(project_by_task_report.columns.values),
-             'y_data': list(project_by_task_report.index.values),
-             'series': []
-         }
-
-        for (column_name, column_data) in project_by_task_report.iteritems():
-             project_by_task_chart_data['series'].append({
-                 'name':column_name,
-                 'type': 'bar',
-                 'stack': 'total',
-                 'label': {
-                     'show': 'true'
-                 },
-                 'emphasis': {
-                     'focus': 'series'
-                 },
-                 'data':list(column_data)
-             })
-
-        html = template_echarts.render(presale_by_task_chart_data=presale_by_task_chart_data, project_by_task_chart_data=project_by_task_chart_data)
-
-        # Write the Echarts HTML file
-        with open('report_echarts.html', 'w') as f:
             f.write(html)
 
 class Project():
