@@ -5,6 +5,7 @@ import pandas as pd
 import jinja2
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 plt.rcParams['font.sans-serif'] = [u'Songti SC']
 plt.rcParams['axes.unicode_minus'] = False
 
@@ -84,6 +85,16 @@ def to_report(report):
         ax.text(v, i, str(v), color='black', fontweight='bold', fontsize=45)
     plt.savefig('project_by_task.svg')
 
+    # Project vs. Presales by Week Report
+    presales_count=report.groupby([u'周'])[u'发起人'].apply(lambda x:len(set(x)))
+    projects_count=report.groupby([u'周'])[u'客户名称'].apply(lambda x:len(set(x)))
+    presale_vs_project_by_week_report = pd.DataFrame(index=presales_count.index, columns=['售前人数', '项目个数', '人均支持项目数'])
+    presale_vs_project_by_week_report=presale_vs_project_by_week_report.fillna(0)
+    presale_vs_project_by_week_report.index.name=None
+    presale_vs_project_by_week_report[u'售前人数']=presales_count
+    presale_vs_project_by_week_report[u'项目个数']=projects_count
+    presale_vs_project_by_week_report[u'人均支持项目数']=np.around(presale_vs_project_by_week_report[u'项目个数']/presale_vs_project_by_week_report[u'售前人数'], decimals=1)
+
 
     # Echarts Template handling
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=''))
@@ -128,7 +139,38 @@ def to_report(report):
              'data':list(column_data)
          })
 
-    html = template_echarts.render(presale_by_task_chart_data=presale_by_task_chart_data, project_by_task_chart_data=project_by_task_chart_data)
+    presale_vs_project_by_week_chart_data = {
+        'legend': list(presale_vs_project_by_week_report.columns.values),
+        'x_data': list(presale_vs_project_by_week_report.index.values),
+        'series': []
+    }
+
+    for (column_name, column_data) in presale_vs_project_by_week_report.iteritems():
+        if column_name == '人均支持项目数':
+            presale_vs_project_by_week_chart_data['series'].append({
+                'name':column_name,
+                'type': 'line',
+                'yAxisIndex': '1',
+                'label': {
+                    'show': 'true'
+                },
+                'data':list(column_data)
+        })
+        else:
+            presale_vs_project_by_week_chart_data['series'].append({
+                'name':column_name,
+                'type': 'bar',
+                 'label': {
+                     'show': 'true'
+                 },
+                'data':list(column_data)
+            })
+
+    html = template_echarts.render(
+        presale_by_task_chart_data=presale_by_task_chart_data,
+        project_by_task_chart_data=project_by_task_chart_data,
+        presale_vs_project_by_week_chart_data=presale_vs_project_by_week_chart_data
+    )
 
     # Write the Echarts HTML file
     with open('report_echarts.html', 'w') as f:
@@ -139,8 +181,8 @@ def main():
     logger()
 
     df = pd.DataFrame()
-    total_weekly_reports = pd.read_excel("data/周报.xlsx", sheet_name="周报")
-    logging.info('Read Excel from data/周报.xlsx')
+    total_weekly_reports = pd.read_excel("data/周报汇总2021H1.xlsx", sheet_name="周报")
+    logging.info('Read Excel')
 
     to_report(total_weekly_reports)
     logging.info('Generate Report')

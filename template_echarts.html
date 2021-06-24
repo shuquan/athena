@@ -5,6 +5,7 @@
     <body style="height: 100%; margin: 0">
         <div id="presale_by_task" style="height: 100%"></div>
         <div id="project_by_task" style="height: 100%"></div>
+        <div id="presale_vs_project_by_week" style="height: 100%"></div>
 
         <script type="text/javascript" src="js/echarts.min.js"></script>
         <!-- Uncomment this line if you want to dataTool extension
@@ -28,16 +29,20 @@
         <script type="text/javascript">
 var presale_by_task_dom = document.getElementById("presale_by_task");
 var presale_by_task_chart = echarts.init(presale_by_task_dom);
+var presale_by_task_chart_data = {{presale_by_task_chart_data}}
+var presale_by_task_option;
+
 var project_by_task_dom = document.getElementById("project_by_task");
 var project_by_task_chart = echarts.init(project_by_task_dom);
-var presale_by_task_chart_data = {{presale_by_task_chart_data}}
 var project_by_task_chart_data = {{project_by_task_chart_data}}
-var app = {};
-
-var presale_by_task_option;
 var project_by_task_option;
 
 
+var presale_vs_project_by_week_dom = document.getElementById("presale_vs_project_by_week");
+var presale_vs_project_by_week_chart = echarts.init(presale_vs_project_by_week_dom);
+var presale_vs_project_by_week_chart_data = {{presale_vs_project_by_week_chart_data}}
+var presale_vs_project_by_week_option;
+var app = {};
 
 presale_by_task_option = {
     tooltip: {
@@ -97,6 +102,57 @@ project_by_task_option = {
 
 if (project_by_task_option && typeof project_by_task_option === 'object') {
     project_by_task_chart.setOption(project_by_task_option);
+}
+
+presale_vs_project_by_week_option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            crossStyle: {
+                color: '#999'
+            }
+        }
+    },
+    toolbox: {
+        feature: {
+            dataView: {show: true, readOnly: false},
+            magicType: {show: true, type: ['line', 'bar']},
+            restore: {show: true},
+            saveAsImage: {show: true}
+        }
+    },
+    legend: {
+        data: presale_vs_project_by_week_chart_data.legend 
+    },
+    xAxis: [
+        {
+            type: 'category',
+            data: presale_vs_project_by_week_chart_data.x_data,
+            axisPointer: {
+                type: 'shadow'
+            },
+            axisLabel: {
+                formatter: '{value} 周'
+            }
+        }
+    ],
+    yAxis: [
+        {
+            type: 'value',
+        },
+        {
+            type: 'value',
+            min: 0,
+            max: 10,
+            interval: 1,
+        }
+    ],
+    series: presale_vs_project_by_week_chart_data.series
+};
+
+if (presale_vs_project_by_week_option && typeof presale_vs_project_by_week_option === 'object') {
+    presale_vs_project_by_week_chart.setOption(presale_vs_project_by_week_option);
 }
         </script>
     </body>
