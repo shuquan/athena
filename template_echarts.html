@@ -5,6 +5,7 @@
     <body style="height: 100%; margin: 0">
         <div id="presale_by_task" style="height: 100%"></div>
         <div id="project_by_task" style="height: 100%"></div>
+        <div id="project_by_presale" style="height: 100%"></div>
         <div id="presale_vs_project_by_week" style="height: 100%"></div>
 
         <script type="text/javascript" src="js/echarts.min.js"></script>
@@ -37,6 +38,10 @@ var project_by_task_chart = echarts.init(project_by_task_dom);
 var project_by_task_chart_data = {{project_by_task_chart_data}}
 var project_by_task_option;
 
+var project_by_presale_dom = document.getElementById("project_by_presale");
+var project_by_presale_chart = echarts.init(project_by_presale_dom);
+var project_by_presale_chart_data = {{project_by_presale_chart_data}}
+var project_by_presale_option;
 
 var presale_vs_project_by_week_dom = document.getElementById("presale_vs_project_by_week");
 var presale_vs_project_by_week_chart = echarts.init(presale_vs_project_by_week_dom);
@@ -102,6 +107,36 @@ project_by_task_option = {
 
 if (project_by_task_option && typeof project_by_task_option === 'object') {
     project_by_task_chart.setOption(project_by_task_option);
+}
+
+project_by_presale_option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {            // Use axis to trigger tooltip
+            type: 'shadow'        // 'shadow' as default; can also be 'line' or 'shadow'
+        }
+    },
+    legend: {
+        data: project_by_presale_chart_data.legend
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'value'
+    },
+    yAxis: {
+        type: 'category',
+        data: project_by_presale_chart_data.y_data
+    },
+    series: project_by_presale_chart_data.series 
+};
+
+if (project_by_presale_option && typeof project_by_presale_option === 'object') {
+    project_by_presale_chart.setOption(project_by_presale_option);
 }
 
 presale_vs_project_by_week_option = {

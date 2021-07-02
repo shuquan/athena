@@ -54,7 +54,7 @@ def to_report(report):
     all_projects.plot(kind='barh',figsize=(15,15),fontsize='15')
     plt.savefig('all_projects.svg')
 
-    # Presales/Task Report
+    # Presales By Task Report
     presale_by_task_report = pd.DataFrame(index=all_presales.index, columns=all_tasks.index)
     presale_by_task_report=presale_by_task_report.fillna(0)
     presale_by_task_report.index.name=None
@@ -70,7 +70,7 @@ def to_report(report):
         ax.text(v+1, i, str(v), color='black', fontweight='bold', fontsize=13)
     plt.savefig('presale_by_task.svg')
 
-    # Project/Task Report
+    # Project By Task Report
     project_by_task_report = pd.DataFrame(index=all_projects.index, columns=all_tasks.index)
     project_by_task_report=project_by_task_report.fillna(0)
     project_by_task_report.index.name=None
@@ -84,6 +84,22 @@ def to_report(report):
     for i, v in enumerate(all_projects):
         ax.text(v, i, str(v), color='black', fontweight='bold', fontsize=45)
     plt.savefig('project_by_task.svg')
+
+	# Project By Presale Report
+    project_by_presale_report = pd.DataFrame(index=all_projects.index, columns=all_presales.index)
+    project_by_presale_report = project_by_presale_report.fillna(0)
+    project_by_presale_report.index.name = None
+    for i in all_projects.index:
+        project_tasks = report[report.客户名称 == i].groupby([u'发起人'])[u'耗时'].sum()
+        for j in all_presales.index:
+            if j in project_tasks.index:
+                project_by_presale_report[j][i]=project_tasks[j]
+
+    ax=project_by_presale_report.plot.barh(stacked=True,figsize=(80,80),fontsize='50');
+    ax.legend(fontsize=35)
+    for i, v in enumerate(all_projects):
+        ax.text(v, i, str(v), color='black', fontweight='bold', fontsize=45)
+    plt.savefig('project_by_presale.svg')
 
     # Project vs. Presales by Week Report
     presales_count=report.groupby([u'周'])[u'发起人'].apply(lambda x:len(set(x)))
@@ -139,6 +155,26 @@ def to_report(report):
              'data':list(column_data)
          })
 
+    project_by_presale_chart_data = {
+         'legend': list(project_by_presale_report.columns.values),
+         'y_data': list(project_by_presale_report.index.values),
+         'series': []
+     }
+
+    for (column_name, column_data) in project_by_presale_report.iteritems():
+         project_by_presale_chart_data['series'].append({
+             'name':column_name,
+             'type': 'bar',
+             'stack': 'total',
+             'label': {
+                 'show': 'true'
+             },
+             'emphasis': {
+                 'focus': 'series'
+             },
+             'data':list(column_data)
+         })
+
     presale_vs_project_by_week_chart_data = {
         'legend': list(presale_vs_project_by_week_report.columns.values),
         'x_data': list(presale_vs_project_by_week_report.index.values),
@@ -167,9 +203,10 @@ def to_report(report):
             })
 
     html = template_echarts.render(
-        presale_by_task_chart_data=presale_by_task_chart_data,
-        project_by_task_chart_data=project_by_task_chart_data,
-        presale_vs_project_by_week_chart_data=presale_vs_project_by_week_chart_data
+        presale_by_task_chart_data = presale_by_task_chart_data,
+        project_by_task_chart_data = project_by_task_chart_data,
+		project_by_presale_chart_data = project_by_presale_chart_data,
+        presale_vs_project_by_week_chart_data = presale_vs_project_by_week_chart_data
     )
 
     # Write the Echarts HTML file
