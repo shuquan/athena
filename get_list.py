@@ -15,6 +15,7 @@ parser.add_argument('username')
 parser.add_argument('password')
 parser.add_argument('--list')
 parser.add_argument('--week')
+parser.add_argument('--num')
 args = parser.parse_args()
 
 def logger():
@@ -181,8 +182,12 @@ def main():
         rows = driver.find_elements_by_css_selector('#list tr')
         total_number = total_number + len(rows)
 
-        # Just for testing limit to 20 records
-        if total_number > 40:
+        # Limit to 40 records by default if not set limit number
+        limit_number = int(args.num)
+        if limit_number is None:
+            limit_number = 40
+
+        if total_number > limit_number:
             break
 
         for row in rows:

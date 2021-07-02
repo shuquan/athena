@@ -181,7 +181,7 @@ def main():
     logger()
 
     df = pd.DataFrame()
-    total_weekly_reports = pd.read_excel("data/周报汇总2021H1.xlsx", sheet_name="周报")
+    total_weekly_reports = pd.read_excel("data/周报.xlsx", sheet_name="周报")
     logging.info('Read Excel')
 
     to_report(total_weekly_reports)
