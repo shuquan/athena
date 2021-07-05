@@ -15,7 +15,7 @@ parser.add_argument('username')
 parser.add_argument('password')
 parser.add_argument('--list')
 parser.add_argument('--week')
-parser.add_argument('--num')
+parser.add_argument('--num', nargs='?', const=1, type=int, default=40)
 args = parser.parse_args()
 
 def logger():
@@ -183,11 +183,7 @@ def main():
         total_number = total_number + len(rows)
 
         # Limit to 40 records by default if not set limit number
-        limit_number = int(args.num)
-        if limit_number is None:
-            limit_number = 40
-
-        if total_number > limit_number:
+        if total_number > args.num:
             break
 
         for row in rows:

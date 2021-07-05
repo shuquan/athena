@@ -10,7 +10,7 @@ plt.rcParams['font.sans-serif'] = [u'Songti SC']
 plt.rcParams['axes.unicode_minus'] = False
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--week')
+parser.add_argument('--drop', nargs='?', const=1, type=bool, default=False)
 args = parser.parse_args()
 
 def logger():
@@ -219,6 +219,12 @@ def main():
 
     df = pd.DataFrame()
     total_weekly_reports = pd.read_excel("data/周报.xlsx", sheet_name="周报")
+
+    if args.drop:
+        # Drop 99cloud from projects
+        logging.info('Drop 99cloud from projects')
+        total_weekly_reports = total_weekly_reports.drop(total_weekly_reports[total_weekly_reports[u'客户名称']=='99cloud'].index)
+
     logging.info('Read Excel')
 
     to_report(total_weekly_reports)
