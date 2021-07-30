@@ -118,6 +118,24 @@ def contracts_handler(total_contracts, record, driver):
     record['归档确认'] = rows[51].get_attribute('textContent')
     total_contracts.append(record)
 
+def income_handler(total_income, record, driver):
+    logging.info('[收入]%s' % driver.title)
+    iframe = driver.find_element_by_id('zwIframe')
+    driver.switch_to.frame(iframe)
+    while driver.execute_script("return document.readyState") != "complete" :
+        time.sleep(1)
+        logging.info('[收入]%s：等待iframe加载' % driver.title)
+    rows = driver.find_elements_by_css_selector('section [class*="browse"]')
+    while len(rows) != 40:
+        time.sleep(1)
+        logging.info('[收入]%s：需要加载40条，已经加载%s条，等待' % (driver.title,len(rows)))
+        rows = driver.find_elements_by_css_selector('section [class*="browse"]')
+    logging.info('[收入]%s：需要加载40条，已经加载%s条' % (driver.title,len(rows)))
+    record['编号'] = rows[2].get_attribute('textContent')
+    record['开票人'] = rows[3].get_attribute('textContent')
+    record['申请部门'] = rows[4].get_attribute('textContent')
+    total_income.append(record)
+
 def weekly_reports_handler(total_weekly_reports, record, driver):
     logging.info('[周报]%s' % driver.title)
     week = args.week
@@ -166,7 +184,7 @@ def others_handler(others, record, driver):
     logging.info('[其他]%s' % driver.title)
     others.append(record)
 
-def to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others):
+def to_excel(total_records, total_travels, total_procurement, total_contracts, total_income, total_weekly_reports, others):
     df = pd.DataFrame(total_records)
     df.to_excel('data/总表.xlsx', sheet_name='总表')
 
@@ -178,6 +196,9 @@ def to_excel(total_records, total_travels, total_procurement, total_contracts, t
 
     df = pd.DataFrame(total_contracts)
     df.to_excel('data/合同单.xlsx', sheet_name='合同单')
+
+    df = pd.DataFrame(total_income)
+    df.to_excel('data/收入单.xlsx', sheet_name='收入单')
 
     df = pd.DataFrame(total_weekly_reports)
     df.to_excel('data/周报.xlsx', sheet_name='周报')
@@ -228,6 +249,7 @@ def main():
     total_travels = []
     total_procurement = []
     total_contracts = []
+    total_income = []
     total_weekly_reports = []
     others = []
 
@@ -268,6 +290,8 @@ def main():
                 travels_handler(total_travels, record, driver)
             elif '销售合同' in subject:
                 contracts_handler(total_contracts, record, driver)
+            elif '销售开票' in subject:
+                income_handler(total_income, record, driver)
             elif '周报' in subject:
                 weekly_reports_handler(total_weekly_reports, record, driver)
             elif '采购' in subject:
@@ -291,7 +315,7 @@ def main():
 
     driver.quit()
 
-    to_excel(total_records, total_travels, total_procurement, total_contracts, total_weekly_reports, others)
+    to_excel(total_records, total_travels, total_procurement, total_contracts, total_income, total_weekly_reports, others)
     to_report(total_weekly_reports)
 
 
