@@ -134,6 +134,30 @@ def income_handler(total_income, record, driver):
     record['编号'] = rows[2].get_attribute('textContent')
     record['开票人'] = rows[3].get_attribute('textContent')
     record['申请部门'] = rows[4].get_attribute('textContent')
+    record['申请日期'] = rows[5].get_attribute('textContent')
+    record['合同号'] = rows[6].get_attribute('textContent')
+    record['合同价'] = rows[7].get_attribute('textContent')
+    record['合同名称'] = rows[8].get_attribute('textContent')
+    record['客户单位名称'] = rows[9].get_attribute('textContent')
+    record['银行账号'] = rows[10].get_attribute('textContent')
+    record['开户银行'] = rows[11].get_attribute('textContent')
+    record['税号'] = rows[12].get_attribute('textContent')
+    record['地址'] = rows[13].get_attribute('textContent')
+    record['电话'] = rows[14].get_attribute('textContent')
+    record['业务类型'] = rows[15].get_attribute('textContent')
+    record['来源类型'] = rows[16].get_attribute('textContent')
+    record['备注说明'] = rows[17].get_attribute('textContent')
+    record['收款类型'] = rows[19].get_attribute('textContent')
+    record['开票类型'] = rows[20].get_attribute('textContent')
+    record['应开票金额'] = rows[21].get_attribute('textContent')
+    record['已开票金额'] = rows[22].get_attribute('textContent')
+    record['本次开票金额'] = rows[23].get_attribute('textContent')
+    record['发票类型'] = rows[24].get_attribute('textContent')
+    record['税率'] = rows[25].get_attribute('textContent')
+    record['税额'] = rows[26].get_attribute('textContent')
+    record['金额(去税)'] = rows[27].get_attribute('textContent')
+    record['发票号码'] = rows[28].get_attribute('textContent')
+    record['备注'] = rows[29].get_attribute('textContent')
     total_income.append(record)
 
 def weekly_reports_handler(total_weekly_reports, record, driver):
@@ -147,7 +171,12 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
         logging.info('[周报]%s：等待iframe加载' % driver.title)
     rows = driver.find_elements_by_css_selector('.is-detailshover')
     for row in rows:
-        tds = row.find_elements_by_css_selector('section [class*="browse"]')
+        try:
+            tds = row.find_elements_by_css_selector('section [class*="browse"]')
+        except StaleElementReferenceException:
+            time.sleep(1)
+            tds = row.find_elements_by_css_selector('section [class*="browse"]')
+
         report = {}
         report['发起人'] = record['发起人']
         report['年份'] = tds[0].get_attribute('textContent')
@@ -264,7 +293,12 @@ def main():
             break
 
         for row in rows:
-            tds = row.find_elements_by_tag_name('td')
+            try:
+                tds = row.find_elements_by_tag_name('td')
+            except StaleElementReferenceException:
+                time.sleep(1)
+                tds = row.find_elements_by_tag_name('td')
+
             subject = tds[1].find_element_by_tag_name('div').get_attribute('title')
             start_member_name = tds[2].find_element_by_tag_name('div').get_attribute('title')
             pre_approver_name = tds[3].find_element_by_tag_name('div').get_attribute('title')
