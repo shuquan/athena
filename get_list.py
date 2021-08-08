@@ -2,8 +2,10 @@ import argparse
 import logging
 import time
 import pandas as pd
+import xlsxwriter
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -126,7 +128,9 @@ def income_handler(total_income, record, driver):
         time.sleep(1)
         logging.info('[收入]%s：等待iframe加载' % driver.title)
     rows = driver.find_elements_by_css_selector('section [class*="browse"]')
-    while len(rows) != 40:
+    while True:
+        # 41 Only one income record; 51 means two records; 62 means three records
+        if len(rows) >= 40:break
         time.sleep(1)
         logging.info('[收入]%s：需要加载40条，已经加载%s条，等待' % (driver.title,len(rows)))
         rows = driver.find_elements_by_css_selector('section [class*="browse"]')
@@ -166,16 +170,19 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
 
     iframe = driver.find_element_by_id('zwIframe')
     driver.switch_to.frame(iframe)
+    time.sleep(1)
     while driver.execute_script("return document.readyState") != "complete" :
         time.sleep(1)
         logging.info('[周报]%s：等待iframe加载' % driver.title)
     rows = driver.find_elements_by_css_selector('.is-detailshover')
     for row in rows:
-        try:
-            tds = row.find_elements_by_css_selector('section [class*="browse"]')
-        except StaleElementReferenceException:
-            time.sleep(1)
-            tds = row.find_elements_by_css_selector('section [class*="browse"]')
+       # try:
+       #     tds = row.find_elements_by_css_selector('section [class*="browse"]')
+       # except StaleElementReferenceException:
+       #     time.sleep(1)
+       #     tds = row.find_elements_by_css_selector('section [class*="browse"]')
+
+        tds = row.find_elements_by_css_selector('section [class*="browse"]')
 
         report = {}
         report['发起人'] = record['发起人']
@@ -215,25 +222,25 @@ def others_handler(others, record, driver):
 
 def to_excel(total_records, total_travels, total_procurement, total_contracts, total_income, total_weekly_reports, others):
     df = pd.DataFrame(total_records)
-    df.to_excel('data/总表.xlsx', sheet_name='总表')
+    df.to_excel('data/总表.xlsx', sheet_name='总表', engine='xlsxwriter')
 
     df = pd.DataFrame(total_travels)
-    df.to_excel('data/出差单.xlsx', sheet_name='出差单')
+    df.to_excel('data/出差单.xlsx', sheet_name='出差单', engine='xlsxwriter')
 
     df = pd.DataFrame(total_procurement)
-    df.to_excel('data/采购单.xlsx', sheet_name='采购单')
+    df.to_excel('data/采购单.xlsx', sheet_name='采购单', engine='xlsxwriter')
 
     df = pd.DataFrame(total_contracts)
-    df.to_excel('data/合同单.xlsx', sheet_name='合同单')
+    df.to_excel('data/合同单.xlsx', sheet_name='合同单', engine='xlsxwriter')
 
     df = pd.DataFrame(total_income)
-    df.to_excel('data/收入单.xlsx', sheet_name='收入单')
+    df.to_excel('data/收入单.xlsx', sheet_name='收入单', engine='xlsxwriter')
 
     df = pd.DataFrame(total_weekly_reports)
-    df.to_excel('data/周报.xlsx', sheet_name='周报')
+    df.to_excel('data/周报.xlsx', sheet_name='周报', engine='xlsxwriter')
 
     df = pd.DataFrame(others)
-    df.to_excel('data/未归类.xlsx', sheet_name='未归类')
+    df.to_excel('data/未归类.xlsx', sheet_name='未归类', engine='xlsxwriter')
 
 def to_report(total_weekly_reports):
     # 售前支持 - 技术方案
@@ -293,11 +300,13 @@ def main():
             break
 
         for row in rows:
-            try:
-                tds = row.find_elements_by_tag_name('td')
-            except StaleElementReferenceException:
-                time.sleep(1)
-                tds = row.find_elements_by_tag_name('td')
+           # try:
+           #     tds = row.find_elements_by_tag_name('td')
+           # except StaleElementReferenceException:
+           #     time.sleep(1)
+           #     tds = row.find_elements_by_tag_name('td')
+
+            tds = row.find_elements_by_tag_name('td')
 
             subject = tds[1].find_element_by_tag_name('div').get_attribute('title')
             start_member_name = tds[2].find_element_by_tag_name('div').get_attribute('title')
@@ -309,15 +318,18 @@ def main():
             total_records.append(record)
 
             # Check the message setting and ignore it
-            msgsettingmenu = driver.find_elements_by_class_name('msgSettingMenu')
-            if len(msgsettingmenu) > 1:
-                msgsettingmenu[1].click()
+           # msgsettingmenu = driver.find_elements_by_class_name('msgSettingMenu')
+           # if len(msgsettingmenu) > 1:
+           #     msgsettingmenu[1].click()
             # Click each row and Open new tab to fetch more data
-            try:
-                webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
-            except StaleElementReferenceException:
-                webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
-            WebDriverWait(driver, 5).until(EC.number_of_windows_to_be(2))
+           # try:
+           #     webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
+           # except StaleElementReferenceException:
+           #     time.sleep(1)
+           #     webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
+
+            webdriver.ActionChains(driver).move_to_element(row).click(row).perform()
+            WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
             window_handles = driver.window_handles
             driver.switch_to.window(window_handles[1])
             if '出差单' in subject:
@@ -342,9 +354,21 @@ def main():
         if len(rows) < 20:
             break
 
-        page_next_button = driver.find_element_by_class_name('pageNext')
-        webdriver.ActionChains(driver).move_to_element(page_next_button).click(page_next_button).perform()
-        #page_next_button.click()
+        input_page = driver.find_elements_by_class_name('common_over_page_txtbox')[1]
+        page_num = int(input_page.get_attribute('value'))
+        logging.info('[页码]第%d页结束' % page_num)
+        next_page_num = page_num + 1
+        input_page.clear()
+        input_page.send_keys(next_page_num)
+
+        current_page_num = int(driver.find_elements_by_class_name('common_over_page_txtbox')[1].get_attribute('value'))
+        logging.info('[页码]进入第%d页' % current_page_num)
+
+        page_go = driver.find_element_by_class_name('common_over_page_go')
+        webdriver.ActionChains(driver).move_to_element(page_go).click(page_go).perform()
+
+        #page_next_button = driver.find_element_by_class_name('pageNext')
+        #webdriver.ActionChains(driver).move_to_element(page_next_button).click(page_next_button).perform()
         time.sleep(1)
 
     driver.quit()
