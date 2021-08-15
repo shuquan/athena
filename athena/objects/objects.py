@@ -162,7 +162,10 @@ class Project():
         self.pre_sales.add(report['发起人'])
         self.project_name = report['客户名称']
         self.hours = report['耗时']
-        self.update_date = int(report['周'])
+        try:
+            self.update_date = int(report['周'])
+        except:
+            self.update_date = -1
 
 # TODO Use work week as start date
 #        st = '%(y)s-%(m)s' % {'y':report['年份'], 'm':report['月份']}
