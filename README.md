@@ -1,1 +1,1 @@
-# seeyon-statistic
+# statistic
