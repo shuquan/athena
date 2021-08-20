@@ -224,29 +224,25 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
         tds = row.find_elements_by_css_selector('section [class*="browse"]')
 
         report = {}
+
         report['发起人'] = record['发起人']
         report['年份'] = tds[0].get_attribute('textContent')
         report['月份'] = tds[1].get_attribute('textContent')
         report['周'] = tds[2].get_attribute('textContent')
-        report['客户名称'] = tds[3].get_attribute('textContent')
+        report['项目名称'] = tds[3].get_attribute('textContent')
         report['销售人员'] = tds[4].get_attribute('textContent')
         report['大类'] = tds[5].get_attribute('textContent')
         report['中类'] = tds[6].get_attribute('textContent')
         report['小类'] = tds[7].get_attribute('textContent')
         report['耗时'] = tds[8].get_attribute('textContent')
-        report['加班'] = tds[9].get_attribute('textContent')
-        report['下周计划'] = tds[10].get_attribute('textContent')
-        report['具体工作描述'] = tds[11].get_attribute('textContent')
+        report['下周计划'] = tds[9].get_attribute('textContent')
+        report['具体工作描述'] = tds[10].get_attribute('textContent')
+        report['备注'] = tds[11].get_attribute('textContent')
 
         if report['耗时']:
             report['耗时'] = float(report['耗时'])
         else:
             report['耗时'] = 0
-
-        if report['加班']:
-            report['加班'] = float(report['加班'])
-        else:
-            report['加班'] = 0
 
         if week is None:
             total_weekly_reports.append(report)
