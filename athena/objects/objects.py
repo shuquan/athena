@@ -160,7 +160,7 @@ class Project():
 
         self.sales.add(report['销售人员'])
         self.pre_sales.add(report['发起人'])
-        self.project_name = report['客户名称']
+        self.project_name = report['项目名称']
         self.hours = report['耗时']
         try:
             self.update_date = int(report['周'])

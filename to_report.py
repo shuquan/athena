@@ -49,7 +49,7 @@ def to_report(report):
     all_tasks.plot(kind='barh',figsize=(10,10),fontsize='15')
     plt.savefig('all_tasks.svg')
 
-    all_projects = report.groupby(u'客户名称')[u'耗时'].sum().sort_values(ascending=True)
+    all_projects = report.groupby(u'项目名称')[u'耗时'].sum().sort_values(ascending=True)
     all_projects.index.name=None
     all_projects.plot(kind='barh',figsize=(15,15),fontsize='15')
     plt.savefig('all_projects.svg')
@@ -75,7 +75,7 @@ def to_report(report):
     project_by_task_report=project_by_task_report.fillna(0)
     project_by_task_report.index.name=None
     for i in all_projects.index:
-        project_tasks = report[report.客户名称 == i].groupby([u'中类'])[u'耗时'].sum()
+        project_tasks = report[report.项目名称 == i].groupby([u'中类'])[u'耗时'].sum()
         for j in all_tasks.index:
             if j in project_tasks.index:
                 project_by_task_report[j][i]=project_tasks[j]
@@ -90,7 +90,7 @@ def to_report(report):
     project_by_presale_report = project_by_presale_report.fillna(0)
     project_by_presale_report.index.name = None
     for i in all_projects.index:
-        project_tasks = report[report.客户名称 == i].groupby([u'发起人'])[u'耗时'].sum()
+        project_tasks = report[report.项目名称 == i].groupby([u'发起人'])[u'耗时'].sum()
         for j in all_presales.index:
             if j in project_tasks.index:
                 project_by_presale_report[j][i]=project_tasks[j]
@@ -103,7 +103,7 @@ def to_report(report):
 
     # Project vs. Presales by Week Report
     presales_count=report.groupby([u'周'])[u'发起人'].apply(lambda x:len(set(x)))
-    projects_count=report.groupby([u'周'])[u'客户名称'].apply(lambda x:len(set(x)))
+    projects_count=report.groupby([u'周'])[u'项目名称'].apply(lambda x:len(set(x)))
     presale_vs_project_by_week_report = pd.DataFrame(index=presales_count.index, columns=['售前人数', '项目个数', '人均支持项目数'])
     presale_vs_project_by_week_report=presale_vs_project_by_week_report.fillna(0)
     presale_vs_project_by_week_report.index.name=None
@@ -222,8 +222,8 @@ def main():
 
     if args.drop:
         # Drop 99cloud from projects
-        logging.info('Drop 99cloud from projects')
-        total_weekly_reports = total_weekly_reports.drop(total_weekly_reports[total_weekly_reports[u'客户名称']=='99cloud'].index)
+        logging.info('Drop 99Cloud from projects')
+        total_weekly_reports = total_weekly_reports.drop(total_weekly_reports[total_weekly_reports[u'项目名称']=='99Cloud'].index)
 
     logging.info('Read Excel')
 
