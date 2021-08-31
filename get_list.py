@@ -237,7 +237,6 @@ def weekly_reports_handler(total_weekly_reports, record, driver):
         report['耗时'] = tds[8].get_attribute('textContent')
         report['下周计划'] = tds[9].get_attribute('textContent')
         report['具体工作描述'] = tds[10].get_attribute('textContent')
-        report['备注'] = tds[11].get_attribute('textContent')
 
         if report['耗时']:
             report['耗时'] = float(report['耗时'])
