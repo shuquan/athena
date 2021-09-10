@@ -102,6 +102,27 @@ project_by_task_option = {
         type: 'category',
         data: project_by_task_chart_data.y_data
     },
+    dataZoom: [
+        {
+            show: true,
+            start: 0,
+            end: 100
+        },
+        {
+            type: 'inside',
+            start: 94,
+            end: 100
+        },
+        {
+            show: true,
+            yAxisIndex: 0,
+            filterMode: 'empty',
+            width: 30,
+            height: '85%',
+            showDataShadow: false,
+            left: '93%'
+        }
+    ],
     series: project_by_task_chart_data.series 
 };
 
@@ -132,6 +153,27 @@ project_by_presale_option = {
         type: 'category',
         data: project_by_presale_chart_data.y_data
     },
+    dataZoom: [
+         {
+             show: true,
+             start: 0,
+             end: 100
+         },
+         {
+             type: 'inside',
+             start: 94,
+             end: 100
+         },
+         {
+             show: true,
+             yAxisIndex: 0,
+             filterMode: 'empty',
+             width: 30,
+             height: '85%',
+             showDataShadow: false,
+             left: '93%'
+         }
+     ],
     series: project_by_presale_chart_data.series 
 };
 
@@ -183,6 +225,27 @@ presale_vs_project_by_week_option = {
             interval: 1,
         }
     ],
+    dataZoom: [
+         {
+             show: true,
+             start: 0,
+             end: 100
+         },
+         {
+             type: 'inside',
+             start: 94,
+             end: 100
+         },
+         {
+             show: true,
+             yAxisIndex: 0,
+             filterMode: 'empty',
+             width: 30,
+             height: '85%',
+             showDataShadow: false,
+             left: '93%'
+         }
+     ],
     series: presale_vs_project_by_week_chart_data.series
 };
 
